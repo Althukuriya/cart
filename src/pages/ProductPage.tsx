@@ -14,7 +14,7 @@ import LoadingSpinner from '../components/common/LoadingSpinner';
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
   const [product, setProduct] = useState<Product | null>(null);
-  const [reviews] = useState<ProductReview[]>([]);
+const [reviews, setReviews] = useState<ProductReview[]>([]);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -38,6 +38,12 @@ export default function ProductPage() {
 
         if (foundProduct) {
           setProduct(foundProduct);
+
+const reviewRes = await fetch(`https://script.google.com/macros/s/AKfycbx_37Z3oxqTtRaROYUyQ1qrFglxbaQQuQwKwIfomG-3qEinY0HvHKKrH6DvBy0i2wQ4/exec?action=getReviews&productSlug=${foundProduct.slug}`);
+
+const reviewData = await reviewRes.json();
+
+setReviews(reviewData.data || []);
           addProduct(foundProduct);
           // Get related products from same category
           if (foundProduct.category) {
@@ -71,11 +77,26 @@ export default function ProductPage() {
     setQuantity(1);
   };
 
-  const handleReviewSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setReviewSubmitted(true);
-    setReviewForm({ name: '', rating: 5, title: '', body: '' });
-  };
+  const handleReviewSubmit = async (
+  e: React.FormEvent
+) => {
+  e.preventDefault();
+
+  await fetch('https://script.google.com/macros/s/AKfycbx_37Z3oxqTtRaROYUyQ1qrFglxbaQQuQwKwIfomG-3qEinY0HvHKKrH6DvBy0i2wQ4/exec', {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'addReview',
+      productId: product?.id,
+      productSlug: product?.slug,
+      name: reviewForm.name,
+      rating: reviewForm.rating,
+      title: reviewForm.title,
+      review: reviewForm.body
+    })
+  });
+
+  setReviewSubmitted(true);
+};
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -188,8 +209,8 @@ export default function ProductPage() {
                     </div>
                     <span className="text-xs text-gray-400">{new Date(review.createdAt).toLocaleDateString()}</span>
                   </div>
-                  <p className="text-sm text-gray-600">{review.body}</p>
-                  <p className="text-xs text-gray-400 mt-2">by {review.reviewerName}</p>
+                  <p className="text-sm text-gray-600">{review.review}</p>
+<p className="text-xs text-gray-400 mt-2">by {review.name}</p>
                 </div>
               ))
             )}
