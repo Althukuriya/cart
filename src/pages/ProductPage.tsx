@@ -121,7 +121,15 @@ export default function ProductPage() {
             )}
           </div>
 
-          <p className="text-gray-600 leading-relaxed">{product.description}</p>
+          <div className="space-y-2">
+  {product.description?.split('\n').map((line, index) => (
+    line.trim() && (
+      <p key={index} className="text-gray-600 leading-relaxed">
+        {line}
+      </p>
+    )
+  ))}
+</div>
 
           {product.sku && <p className="text-sm text-gray-400">SKU: {product.sku}</p>}
 
