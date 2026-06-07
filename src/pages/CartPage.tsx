@@ -2,9 +2,10 @@ import { Link } from 'react-router-dom';
 import { Minus, Plus, Trash2, ShoppingCart, ArrowRight } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { formatPrice } from '../lib/utils';
-
+import { useSettings } from '../contexts/SettingsContext';
 export default function CartPage() {
   const { items, removeFromCart, updateQuantity, totalAmount, totalItems, clearCart } = useCart();
+const { settings } = useSettings();
 
   if (items.length === 0) {
     return (
@@ -19,8 +20,15 @@ export default function CartPage() {
     );
   }
 
-  const shipping = 0;
-  const total = totalAmount + shipping;
+  const shippingCharge = Number(settings.shippingCharge || 0);
+const freeShippingAbove = Number(settings.freeShippingAbove || 999999);
+
+const shipping =
+  totalAmount >= freeShippingAbove
+    ? 0
+    : shippingCharge;
+
+const total = totalAmount + shipping;
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">

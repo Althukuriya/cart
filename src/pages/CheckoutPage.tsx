@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Truck, ShieldCheck } from 'lucide-react';
 import { useCart } from '../contexts/CartContext';
 import { useOrderHistory } from '../contexts/OrderHistoryContext';
+import { useSettings } from '../contexts/SettingsContext';
 import { formatPrice, INDIAN_STATES, generateOrderId } from '../lib/utils';
 import { ordersApi } from '../lib/api';
 import type { CustomerInfo, Order } from '../types';
@@ -10,6 +11,7 @@ import type { CustomerInfo, Order } from '../types';
 export default function CheckoutPage() {
   const { items, totalAmount, clearCart } = useCart();
   const { addOrder } = useOrderHistory();
+  const { settings } = useSettings();
   const navigate = useNavigate();
   const [step, setStep] = useState<'address' | 'review'>('address');
   const [submitting, setSubmitting] = useState(false);
@@ -25,8 +27,15 @@ export default function CheckoutPage() {
     return null;
   }
 
-  const shipping = 0;
-  const total = totalAmount + shipping;
+  const shippingCharge = Number(settings.shippingCharge || 0);
+const freeShippingAbove = Number(settings.freeShippingAbove || 999999);
+
+const shipping =
+  totalAmount >= freeShippingAbove
+    ? 0
+    : shippingCharge;
+
+const total = totalAmount + shipping;
 
   const validateAddress = (): boolean => {
     const { fullName, phone, email, address, city, state, pincode } = customer;
@@ -203,7 +212,12 @@ export default function CheckoutPage() {
             <h2 className="font-semibold text-gray-900 mb-3">Payment Summary</h2>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span>{formatPrice(totalAmount)}</span></div>
-              <div className="flex justify-between"><span className="text-gray-500">Shipping</span><span className="text-emerald-600 font-medium">FREE</span></div>
+              <div className="flex justify-between">
+  <span className="text-gray-500">Shipping</span>
+  <span className="text-emerald-600 font-medium">
+    {shipping === 0 ? 'FREE' : formatPrice(shipping)}
+  </span>
+</div>
               <div className="flex justify-between"><span className="text-gray-500">Payment Method</span><span>Cash on Delivery</span></div>
               <div className="border-t border-gray-200 pt-2 flex justify-between font-bold">
                 <span>Total</span><span className="text-lg">{formatPrice(total)}</span>
