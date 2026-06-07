@@ -275,6 +275,10 @@ export const authApi = {
 // ─── Site Settings API ──────────────────────────────────
 
 export interface SiteSettings {
+
+  shippingCharge: string;
+freeShippingAbove: string;
+codCharge: string;
   storeName: string;
   storeTagline: string;
   heroImage: string;
@@ -314,6 +318,9 @@ const DEFAULT_SETTINGS: SiteSettings = {
   ownerEmail: 'althukuriya83@gmail.com',
   announcements: '',
   footerText: 'All rights reserved.',
+  shippingCharge: '50',
+  freeShippingAbove: '999',
+  codCharge: '0',
 };
 
 let localSettings: SiteSettings = { ...DEFAULT_SETTINGS };
